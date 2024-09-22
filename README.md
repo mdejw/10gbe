@@ -2,7 +2,12 @@
 
 ## Hardware
 
+Originally, hwardware was:
 KC705 + Si5xx board that generates transceiver clock for 10GbE
+
+But this is a port to STLV7325 v1.
+
+**Note:** Below info about KC705 is not updated.
 
 Note with current setup program an external clock generator to 156.25MHz and connect to J15-16 SMAs of KC705
 
@@ -14,7 +19,7 @@ ten_gig_eth_pcs_pma_0.xci @ 2018.3.1 vivado
 
 ## LiteEth
 
-https://github.com/jersey99/liteeth/tree/10gbe-test-setup
+current version enjoy-digital
 
 ## Information
 

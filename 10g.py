@@ -8,7 +8,7 @@ from migen.genlib.misc import WaitTimer
 
 from litex.soc.cores.freqmeter import FreqMeter
 
-from litex_boards.targets.xilinx_kc705 import BaseSoC
+from litex_boards.targets.sitlinv_stlv7325_v1 import BaseSoC
 
 from litex.soc.cores.clock import *
 from litex.soc.integration.soc_core import *
@@ -22,7 +22,7 @@ from liteeth.core import LiteEthUDPIPCore
 from liteeth.frontend.etherbone import LiteEthEtherbone
 from liteeth.common import convert_ip
 
-from litex_boards.platforms.xilinx_kc705 import Platform
+from litex_boards.platforms.sitlinv_stlv7325_v1 import Platform
 
 class XilinxXGMII(Module, AutoCSR):
     """
@@ -64,9 +64,12 @@ class XilinxXGMII(Module, AutoCSR):
         drp_drdy_i  = Signal()
         drp_den_i   = Signal()
 
-        refclk_pads = platform.request("user_sma_mgt_refclk")
-        rx_pads     = platform.request("sfp_rx")
-        tx_pads     = platform.request("sfp_tx")
+        # refclk_pads = platform.request("user_sma_mgt_refclk")
+        # rx_pads     = platform.request("sfp_rx")
+        # tx_pads     = platform.request("sfp_tx")
+        refclk_pads = platform.request("clk156")
+        rx_pads     = platform.request("sfp_a_rx")
+        tx_pads     = platform.request("sfp_a_tx")
         self.tx_disable = Signal()
         self.qplllock   = Signal()
         self.gtrxreset  = Signal()
@@ -76,7 +79,7 @@ class XilinxXGMII(Module, AutoCSR):
         self.coreclk = Signal()
 
         self.comb += [
-            platform.request("sfp_tx_disable_n").eq(~self.tx_disable),
+            # platform.request("sfp_tx_disable_n").eq(~self.tx_disable),
         ]
 
         self.pcs_clear = pcs_clear = Signal()
@@ -176,7 +179,12 @@ class TenGbeTestSoC(BaseSoC, AutoCSR):
     def __init__(self, **kwargs):
         super().__init__(with_led_chaser=False, **kwargs)
 
-        self.user_leds = user_leds = [self.platform.request("user_led", i) for i in range(8)]
+        if False:
+            self.user_leds = user_leds = [self.platform.request("user_led", i) for i in range(8)]
+        else:
+            user_leds_n = [self.platform.request("user_led_n", i) for i in range(8)]
+            self.user_leds = user_leds = Signal(8)
+            self.comb += user_leds.eq(~Cat(user_leds_n))
         self.counter = counter = Signal(27)
         self.sync += counter.eq(counter+1)
         self.comb += user_leds[0].eq(counter[26])
@@ -203,6 +211,7 @@ class TenGbeTestSoC(BaseSoC, AutoCSR):
         # self.add_wb_master(self.etherbone.wishbone.bus)
 
 
+        # serial = self.platform.request("serial")
         serial = self.platform.request("serial")
         self.submodules.uart = uart.UARTWishboneBridge(
             serial,
